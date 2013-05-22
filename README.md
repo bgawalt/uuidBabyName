@@ -5,11 +5,22 @@ A python utility to turn a 36 hex-char UUID into a human-pronounceable baby name
 
 The pronounceability gag is stolen from hastebin, http://hastebin.com/, with their clever alternate-consonants-and-vowels trick.
 
-The name-generation itself is fully deterministic, which is an interesting twist to me: a lot of the fun CPU-generated-text stuff I do depends on a random number generator to produce its fun outcomes (a la @fakespearean, http://twitter.com/fakespearean). I guess in this case I'm just outsourcing the RNG to the UUID part. But it's still cool that these names are kind of hiding inside the ugly `55ed2e23-bb45-4e25-abff-033a42927663` string -- given the UUID, we don't need to rely on (additional) luck in order to reveal the name **Wa Meka Rutoki-Boporez-Yu.**
+The name-generation itself is fully deterministic, which is an interesting twist to me: a lot of the fun CPU-generated-text stuff I do depends on a random number generator to produce its fun outcomes (a la @fakespearean, http://twitter.com/fakespearean). I guess in this case I'm just outsourcing the RNG to the UUID part. But it's still cool that these names are kind of hiding inside the ugly `55ed2e23-bb45-4e25-abff-033a42927663` string -- given the UUID, we don't need to rely on (additional) luck in order to reveal the name **"Wa Meka Rutoki-Boporez-Yu."**
 
 My favorite name yet: `edf881dc-c811-4e71-b316-3b3ad48ffe71` actually means **"Fito Gipupod."**
 
-A WARNING: Some steps it takes, like stripping out multiple consecutive whitespace characters, means that the baby names are no longer (necessarily) unique themselves. Two different UUIDs can yield the same baby name.
+How It Works
+------------
+
+The UUIDs are strings of characters, each character being a hexidecimal digit (a _hexit_). Any pair of them taken together can define a number between 0 (`00`) and 255 (`ff`).
+
+Take the 21 consonants and 5 (basic, non-_y_) vowels, and form all consonant-vowel ordered-pairs. Call these 105 pairings the space of _syllables_, and number them in order.
+
+Each consecutive pair of hexits, together forming the number _n_, generates a new syllable by looking up which consonant-vowel pair is assigned that number _n_. This repeats for all the hexit pairs in the UUID, growing the baby name syllable by syllable. 
+
+If _n_ is bigger than 105, there's a few twists I added to make things more interesting. White space might be added, or a dash, or I might insert a consonant and _then_ add the white space/dash. The control flow over how to handle large _n_ is all governed with some modulo arithmetic over _n_.
+
+All this leads to into some cleanup: stripping off trailing whitespace or dashes, for example, and capitalizing the name-parts. A WARNING: This cleanup means two different UUIDs can yield the same baby name, so don't get cute and try using this for reals as a source of UUIDs.
 
 Some Example Results
 --------------------
